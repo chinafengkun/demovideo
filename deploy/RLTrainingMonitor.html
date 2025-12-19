@@ -1,0 +1,1029 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>强化学习训练监控系统</title>
+    <style>
+        /* 全局样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 容器 */
+        #container {
+            margin-left: 0;
+            margin-right: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 顶部区域 */
+        .top-section {
+            height: 20vh;
+            min-height: 150px;
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: white;
+            padding: 20px 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* 中间区域 */
+        .middle-section {
+            flex: 1;
+            background: #ffffff;
+            padding: 20px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        
+        /* 左侧学生列表区域 */
+        .student-list {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+        
+        .student-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid #dee2e6;
+        }
+        
+        .student-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .student-item.active {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+            font-weight: bold;
+        }
+        
+        .student-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .student-status {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .status-running {
+            color: #28a745;
+        }
+        
+        .status-completed {
+            color: #6c757d;
+        }
+        
+        .status-paused {
+            color: #ffc107;
+        }
+        
+        /* 右侧内容区域 */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* 学生基本信息卡片 */
+        .student-info-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2196f3;
+            margin-bottom: 5px;
+        }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        /* 数据展示网格 */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* 卡片标题 */
+        .card-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 卡片图标 */
+        .card-icon {
+            font-size: 1.3em;
+            color: #3b82f6;
+        }
+        
+        /* 训练进度区域 */
+        .training-progress {
+            margin-bottom: 20px;
+        }
+        
+        .progress-item {
+            margin-bottom: 15px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .progress-label {
+            font-weight: bold;
+        }
+        
+        .progress-value {
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        .progress-bar-container {
+            background: #f3f4f6;
+            border-radius: 6px;
+            height: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            transition: width 0.5s ease;
+        }
+        
+        /* 资源利用区域 */
+        .resource-usage {
+            margin-top: 20px;
+        }
+        
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .resource-label {
+            font-weight: bold;
+        }
+        
+        .resource-value {
+            font-weight: bold;
+        }
+        
+        .resource-bar-container {
+            flex: 1;
+            margin: 0 15px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .resource-bar {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .cpu-bar {
+            background: linear-gradient(90deg, #ff9800, #f57c00);
+        }
+        
+        .gpu-bar {
+            background: linear-gradient(90deg, #f44336, #d32f2f);
+        }
+        
+        .memory-bar {
+            background: linear-gradient(90deg, #4caf50, #388e3c);
+        }
+        
+        .disk-bar {
+            background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+        }
+        
+        /* 图表容器 */
+        .chart-container {
+            height: 250px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* 训练历史区域 */
+        .training-history {
+            margin-top: 20px;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .history-table th,
+        .history-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .history-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #388e3c;
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #f57c00;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+        
+        /* 指标卡片 */
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        /* 指标网格 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* 损失曲线图表 */
+        .loss-chart {
+            height: 200px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loss-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to top, #3b82f6 0%, transparent 100%);
+            clip-path: polygon(0 100%, 10% 85%, 20% 75%, 30% 65%, 40% 55%, 50% 45%, 60% 35%, 70% 30%, 80% 25%, 90% 20%, 100% 15%, 100% 100%);
+            transition: clip-path 1s ease;
+        }
+        
+        /* 底部区域 */
+        .bottom-section {
+            height: auto;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px;
+            scrollbar-width: thin;
+            -ms-overflow-style: auto;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        /* 导航按钮 */
+        .nav-button {
+            padding: 10px 15px;
+            margin: 0 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            flex-shrink: 0;
+            min-width: 80px;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+        }
+        
+        .nav-button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        /* 信息行 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            min-height: 32px;
+        }
+        
+        /* 高亮文本 */
+        .highlight-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #28a745;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container">
+        <!-- 上部分：信息展示区 -->
+        <div class="top-section">
+            <!-- 第一行：日期时间、登录信息、操作按钮 -->
+            <div class="info-row">
+                <div>
+                    <span id="datetime" class="text-sm"></span>
+                    <span style="margin-left: 20px;">登录用户：<span class="highlight-text">张丰</span></span>
+                </div>
+                <div>
+                    <button class="nav-button" onclick="navigateTo('home')">
+                        <span>🏠</span>
+                        教师首页
+                    </button>
+                    <button class="nav-button" onclick="navigateTo('summary')">
+                        <span>📊</span>
+                        课程总结
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 第二行：课程信息 -->
+            <div class="info-row">
+                <div>
+                    <span>课程：</span>
+                    <span class="highlight-text" id="course-name">AI Xbot中阶-3</span>
+                </div>
+                <div>
+                    <span>任务：</span>
+                    <span class="highlight-text" id="task-name">强化学习模型训练</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中部分：主要内容区 -->
+        <div class="middle-section">
+            <!-- 左侧学生列表 -->
+            <div class="student-list">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;">学生列表</h3>
+                <div class="student-item active" onclick="selectStudent(1)">
+                    <div class="student-name">张明科</div>
+                    <div class="student-status status-running">⏱️ 训练中</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(2)">
+                    <div class="student-name">李华</div>
+                    <div class="student-status status-running">⏱️ 训练中</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(3)">
+                    <div class="student-name">王强</div>
+                    <div class="student-status status-completed">✅ 已完成</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(4)">
+                    <div class="student-name">赵敏</div>
+                    <div class="student-status status-paused">⏸️ 已暂停</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(5)">
+                    <div class="student-name">刘伟</div>
+                    <div class="student-status status-running">⏱️ 训练中</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(6)">
+                    <div class="student-name">陈静</div>
+                    <div class="student-status status-completed">✅ 已完成</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(7)">
+                    <div class="student-name">周杰</div>
+                    <div class="student-status status-running">⏱️ 训练中</div>
+                </div>
+                <div class="student-item" onclick="selectStudent(8)">
+                    <div class="student-name">吴敏</div>
+                    <div class="student-status status-paused">⏸️ 已暂停</div>
+                </div>
+            </div>
+            
+            <!-- 右侧内容区 -->
+            <div class="content-area">
+                <!-- 学生基本信息卡片 -->
+                <div class="student-info-card">
+                    <h3 style="margin-bottom: 15px; color: #2c3e50;">张明科 - 强化学习模型训练</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-value" id="student-epoch">125</div>
+                            <div class="info-label">当前轮次</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-value" id="student-total-epochs">200</div>
+                            <div class="info-label">总轮次</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-value" id="student-accuracy">89.5%</div>
+                            <div class="info-label">准确率</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-value" id="student-loss">0.087</div>
+                            <div class="info-label">损失值</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 数据展示网格 -->
+                <div class="data-grid">
+                    <!-- 训练进度卡片 -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span class="card-icon">📈</span>
+                            训练进度
+                        </h3>
+                        <div class="training-progress">
+                            <div class="progress-item">
+                                <div class="progress-header">
+                                    <span class="progress-label">训练轮次</span>
+                                    <span class="progress-value"><span id="epoch-progress">125</span>/200</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="epoch-bar" style="width: 62.5%"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-header">
+                                    <span class="progress-label">模型准确率</span>
+                                    <span class="progress-value"><span id="accuracy-progress">89.5</span>%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="accuracy-bar" style="width: 89.5%"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-header">
+                                    <span class="progress-label">损失值</span>
+                                    <span class="progress-value"><span id="loss-progress">0.087</span></span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="loss-bar" style="width: 8.7%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 计算资源利用卡片 -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span class="card-icon">💻</span>
+                            计算资源利用
+                        </h3>
+                        <div class="resource-usage">
+                            <div class="resource-item">
+                                <span class="resource-label">CPU 使用率</span>
+                                <div class="resource-bar-container">
+                                    <div class="resource-bar cpu-bar" id="cpu-bar" style="width: 75%"></div>
+                                </div>
+                                <span class="resource-value"><span id="cpu-value">75</span>%</span>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-label">GPU 使用率</span>
+                                <div class="resource-bar-container">
+                                    <div class="resource-bar gpu-bar" id="gpu-bar" style="width: 92%"></div>
+                                </div>
+                                <span class="resource-value"><span id="gpu-value">92</span>%</span>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-label">内存使用</span>
+                                <div class="resource-bar-container">
+                                    <div class="resource-bar memory-bar" id="memory-bar" style="width: 85%"></div>
+                                </div>
+                                <span class="resource-value"><span id="memory-value">85</span>%</span>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-label">磁盘使用</span>
+                                <div class="resource-bar-container">
+                                    <div class="resource-bar disk-bar" id="disk-bar" style="width: 68%"></div>
+                                </div>
+                                <span class="resource-value"><span id="disk-value">68</span>%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 训练指标卡片 -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span class="card-icon">📊</span>
+                            训练指标
+                        </h3>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-value" id="metric-reward">+125.8</div>
+                                <div class="metric-label">平均奖励</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="metric-epsilon">0.05</div>
+                                <div class="metric-label">探索率</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="metric-step">15,247</div>
+                                <div class="metric-label">总步数</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="metric-time">2h 35m</div>
+                                <div class="metric-label">训练时长</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 损失曲线卡片 -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span class="card-icon">📉</span>
+                            损失曲线
+                        </h3>
+                        <div class="loss-chart">
+                            <div class="loss-line" id="loss-line"></div>
+                            <div style="position: absolute; bottom: 15px; left: 15px; font-weight: bold;">轮次</div>
+                            <div style="position: absolute; top: 15px; left: 15px; font-weight: bold;">损失值</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 训练历史记录 -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <span class="card-icon">📋</span>
+                        训练历史记录
+                    </h3>
+                    <div class="training-history">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>轮次</th>
+                                    <th>损失值</th>
+                                    <th>准确率</th>
+                                    <th>奖励值</th>
+                                    <th>时间</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr>
+                                    <td>125</td>
+                                    <td>0.087</td>
+                                    <td>89.5%</td>
+                                    <td>+125.8</td>
+                                    <td>10:30:25</td>
+                                </tr>
+                                <tr>
+                                    <td>120</td>
+                                    <td>0.092</td>
+                                    <td>88.2%</td>
+                                    <td>+120.5</td>
+                                    <td>10:28:15</td>
+                                </tr>
+                                <tr>
+                                    <td>115</td>
+                                    <td>0.098</td>
+                                    <td>87.1%</td>
+                                    <td>+115.2</td>
+                                    <td>10:26:05</td>
+                                </tr>
+                                <tr>
+                                    <td>110</td>
+                                    <td>0.105</td>
+                                    <td>85.8%</td>
+                                    <td>+110.8</td>
+                                    <td>10:23:55</td>
+                                </tr>
+                                <tr>
+                                    <td>105</td>
+                                    <td>0.112</td>
+                                    <td>84.5%</td>
+                                    <td>+105.3</td>
+                                    <td>10:21:45</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="viewModel()">
+                        <span>👁️</span>
+                        查看模型
+                    </button>
+                    <button class="btn btn-success" onclick="downloadModel()">
+                        <span>💾</span>
+                        下载模型
+                    </button>
+                    <button class="btn btn-warning" onclick="pauseTraining()">
+                        <span>⏸️</span>
+                        暂停训练
+                    </button>
+                    <button class="btn btn-danger" onclick="stopTraining()">
+                        <span>⏹️</span>
+                        停止训练
+                    </button>
+                    <button class="btn btn-primary" onclick="generateReport()">
+                        <span>📄</span>
+                        生成报告
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 下部分：快速导航 -->
+        <div class="bottom-section">
+            <button class="nav-button" onclick="navigateTo('home')">
+                <span>🏠</span>
+                教师首页
+            </button>
+            <button class="nav-button" onclick="navigateTo('schedule')">
+                <span>📅</span>
+                课程表
+            </button>
+            <button class="nav-button" onclick="navigateTo('attendance')">
+                <span>✅</span>
+                考勤管理
+            </button>
+            <button class="nav-button" onclick="navigateTo('grades')">
+                <span>📊</span>
+                成绩管理
+            </button>
+            <button class="nav-button" onclick="navigateTo('students')">
+                <span>👥</span>
+                学生管理
+            </button>
+            <button class="nav-button" onclick="navigateTo('report')">
+                <span>📝</span>
+                报表生成
+            </button>
+            <button class="nav-button" onclick="navigateTo('settings')">
+                <span>⚙️</span>
+                设置
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟学生数据
+        const students = [
+            { id: 1, name: '张明科', status: 'running', epoch: 125, totalEpochs: 200, accuracy: 89.5, loss: 0.087 },
+            { id: 2, name: '李华', status: 'running', epoch: 98, totalEpochs: 200, accuracy: 82.3, loss: 0.124 },
+            { id: 3, name: '王强', status: 'completed', epoch: 200, totalEpochs: 200, accuracy: 92.1, loss: 0.065 },
+            { id: 4, name: '赵敏', status: 'paused', epoch: 75, totalEpochs: 200, accuracy: 78.9, loss: 0.156 },
+            { id: 5, name: '刘伟', status: 'running', epoch: 156, totalEpochs: 200, accuracy: 91.2, loss: 0.072 },
+            { id: 6, name: '陈静', status: 'completed', epoch: 200, totalEpochs: 200, accuracy: 87.8, loss: 0.095 },
+            { id: 7, name: '周杰', status: 'running', epoch: 112, totalEpochs: 200, accuracy: 85.6, loss: 0.108 },
+            { id: 8, name: '吴敏', status: 'paused', epoch: 56, totalEpochs: 200, accuracy: 75.3, loss: 0.182 }
+        ];
+        
+        // 当前选中的学生
+        let currentStudentId = 1;
+        
+        // 更新日期时间
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const datetimeElement = document.getElementById('datetime');
+            if (datetimeElement) {
+                datetimeElement.textContent = `${dateStr} ${timeStr}`;
+            }
+        }
+        
+        // 生成随机数据的函数
+        function generateRandomValue(base, range) {
+            return (base + (Math.random() - 0.5) * range).toFixed(1);
+        }
+        
+        // 更新训练数据
+        function updateTrainingData() {
+            const student = students.find(s => s.id === currentStudentId);
+            if (student && student.status === 'running') {
+                // 更新轮次
+                student.epoch = Math.min(student.epoch + 1, student.totalEpochs);
+                // 更新准确率（模拟）
+                student.accuracy = Math.min(95, student.accuracy + parseFloat(generateRandomValue(0.2, 0.5)));
+                // 更新损失值（模拟）
+                student.loss = Math.max(0.05, student.loss - parseFloat(generateRandomValue(0.002, 0.005)));
+                
+                // 更新UI
+                updateStudentUI(student);
+            }
+        }
+        
+        // 更新资源使用数据
+        function updateResourceUsage() {
+            // 生成随机资源使用数据
+            const cpuUsage = Math.floor(Math.random() * 20) + 70;
+            const gpuUsage = Math.floor(Math.random() * 15) + 85;
+            const memoryUsage = Math.floor(Math.random() * 15) + 75;
+            const diskUsage = Math.floor(Math.random() * 10) + 65;
+            
+            // 更新UI
+            document.getElementById('cpu-value').textContent = cpuUsage;
+            document.getElementById('cpu-bar').style.width = `${cpuUsage}%`;
+            
+            document.getElementById('gpu-value').textContent = gpuUsage;
+            document.getElementById('gpu-bar').style.width = `${gpuUsage}%`;
+            
+            document.getElementById('memory-value').textContent = memoryUsage;
+            document.getElementById('memory-bar').style.width = `${memoryUsage}%`;
+            
+            document.getElementById('disk-value').textContent = diskUsage;
+            document.getElementById('disk-bar').style.width = `${diskUsage}%`;
+        }
+        
+        // 更新学生UI
+        function updateStudentUI(student) {
+            // 更新基本信息
+            document.getElementById('student-epoch').textContent = student.epoch;
+            document.getElementById('student-accuracy').textContent = student.accuracy.toFixed(1) + '%';
+            document.getElementById('student-loss').textContent = student.loss.toFixed(3);
+            
+            // 更新训练进度
+            const progress = (student.epoch / student.totalEpochs) * 100;
+            document.getElementById('epoch-progress').textContent = student.epoch;
+            document.getElementById('epoch-bar').style.width = `${progress}%`;
+            document.getElementById('accuracy-progress').textContent = student.accuracy.toFixed(1);
+            document.getElementById('accuracy-bar').style.width = `${student.accuracy}%`;
+            
+            const lossProgress = student.loss * 100;
+            document.getElementById('loss-progress').textContent = student.loss.toFixed(3);
+            document.getElementById('loss-bar').style.width = `${lossProgress}%`;
+            
+            // 更新指标
+            document.getElementById('metric-reward').textContent = `+${(student.accuracy * 1.4).toFixed(1)}`;
+            document.getElementById('metric-step').textContent = (student.epoch * 122).toLocaleString();
+            
+            // 更新历史记录
+            updateHistoryTable(student);
+        }
+        
+        // 更新历史记录表格
+        function updateHistoryTable(student) {
+            const tbody = document.getElementById('history-table-body');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            // 创建新行
+            const newRow = tbody.insertRow(0);
+            newRow.innerHTML = `
+                <td>${student.epoch}</td>
+                <td>${student.loss.toFixed(3)}</td>
+                <td>${student.accuracy.toFixed(1)}%</td>
+                <td>+${(student.accuracy * 1.4).toFixed(1)}</td>
+                <td>${timeStr}</td>
+            `;
+            
+            // 保持表格最多显示5行
+            if (tbody.rows.length > 5) {
+                tbody.deleteRow(tbody.rows.length - 1);
+            }
+        }
+        
+        // 选择学生
+        function selectStudent(studentId) {
+            // 更新当前学生ID
+            currentStudentId = studentId;
+            
+            // 更新学生列表的激活状态
+            const studentItems = document.querySelectorAll('.student-item');
+            studentItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.student-item').classList.add('active');
+            
+            // 获取学生数据
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                // 更新UI
+                document.querySelector('.student-info-card h3').textContent = `${student.name} - 强化学习模型训练`;
+                updateStudentUI(student);
+            }
+        }
+        
+        // 生成随机的损失曲线
+        function updateLossCurve() {
+            const lossLine = document.getElementById('loss-line');
+            const points = [];
+            points.push('0 100%');
+            
+            for (let i = 10; i <= 100; i += 10) {
+                const y = 100 - (Math.random() * 20 + (i * 0.8));
+                points.push(`${i}% ${y}%`);
+            }
+            points.push('100% 100%');
+            
+            lossLine.style.clipPath = `polygon(${points.join(', ')})`;
+        }
+        
+        // 操作按钮功能
+        function viewModel() {
+            alert('正在查看张明科的强化学习模型...');
+        }
+        
+        function downloadModel() {
+            alert('正在下载张明科的强化学习模型...');
+        }
+        
+        function pauseTraining() {
+            alert('正在暂停张明科的强化学习模型训练...');
+        }
+        
+        function stopTraining() {
+            alert('正在停止张明科的强化学习模型训练...');
+        }
+        
+        function generateReport() {
+            alert('正在生成张明科的强化学习模型训练报告...');
+        }
+        
+        // 导航功能
+        function navigateTo(page) {
+            const pageNames = {
+                'home': '教师首页',
+                'summary': '课程总结',
+                'schedule': '课程表',
+                'attendance': '考勤管理',
+                'grades': '成绩管理',
+                'students': '学生管理',
+                'report': '报表生成',
+                'settings': '设置'
+            };
+            
+            // 显示跳转提示
+            alert(`正在跳转到${pageNames[page] || page}...`);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新日期时间
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // 更新训练数据（每5秒）
+            setInterval(updateTrainingData, 5000);
+            
+            // 更新资源使用数据（每2秒）
+            setInterval(updateResourceUsage, 2000);
+            
+            // 更新损失曲线（每10秒）
+            setInterval(updateLossCurve, 10000);
+        });
+    </script>
+</body></html>

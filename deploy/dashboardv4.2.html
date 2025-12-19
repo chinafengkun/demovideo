@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>具身智能课程平台指挥中心v4.2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 1920px;
+            height: 1080px;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #0a0e27;
+            display: grid;
+            grid-template-rows: 54px 648px 378px; /* 5%→54px, 60%→648px, 35%→378px */
+            overflow: hidden;
+        }
+        
+        /* 通用模块样式 */
+        .module {
+            background-color: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            padding: 12px;
+            overflow: hidden;
+        }
+        
+        /* 模块标题样式 */
+        .module-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #2196f3;
+        }
+        
+        /* 表格样式 */
+        .stats-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: 16px;
+        }
+        
+        .stats-table td {
+            padding: 6px 0;
+            border: none;
+            vertical-align: middle;
+        }
+        
+        .stats-table td:first-child {
+            text-align: left;
+            font-size: 14px;
+            color: #90caf9;
+            width: 50%;
+        }
+        
+        .stats-table td:nth-child(2),
+        .stats-table td:nth-child(3) {
+            text-align: right;
+            font-size: 20px;
+            color: #4caf50;
+            width: 25%;
+        }
+        
+        .stats-table td:nth-child(3) {
+            font-size: 13px;
+        }
+        
+        /* 市场总览特殊样式 */
+        .market-overview {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .table-group-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin: 8px 0 4px 0;
+            color: #2196f3;
+        }
+        
+        .table-group-title:first-child {
+            margin-top: 0;
+        }
+        
+        /* 上部分 */
+        .top-section {
+            grid-row: 1;
+            background-color: rgba(33, 150, 243, 0.15);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #2196f3;
+            padding: 0 24px; /* 左右各留一个汉字大小的间距 */
+        }
+        
+        /* 顶部左侧日期时间 */
+        .top-left {
+            font-size: 20px;
+        }
+        
+        /* 顶部中间标题 */
+        .top-center {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        /* 顶部右侧登录信息 */
+        .top-right {
+            font-size: 20px;
+        }
+        
+        /* 中间部分 */
+        .middle-section {
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: 384px 1152px 384px; /* 20%→384px, 60%→1152px, 20%→384px */
+        }
+        
+        /* 中间左边部分 */
+        .middle-left {
+            display: grid;
+            grid-template-rows: 453px 195px; /* 70%→453px, 30%→195px */
+        }
+        
+        .middle-left-top {
+            grid-row: 1;
+        }
+        
+        .middle-left-bottom {
+            grid-row: 2;
+        }
+        
+        /* 中间中央部分 */
+        .middle-center {
+            grid-column: 2;
+        }
+        
+        /* 中间右边部分 */
+        .middle-right {
+            display: grid;
+            grid-template-rows: 216px 216px 216px; /* 1/3 each → 216px */
+        }
+        
+        /* 下部分 */
+        .bottom-section {
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 640px 640px 640px; /* 1/3 each → 640px */
+        }
+    </style>
+</head>
+<body>
+    <div class="top-section">
+        <div class="top-left" id="datetime">2025-12-15 星期一 10:00:00</div>
+        <div class="top-center">具身智能课程平台运行监控中心</div>
+        <div class="top-right">登录账号：卢潇</div>
+    </div>
+    
+    <div class="middle-section">
+        <div class="middle-left">
+            <div class="module middle-left-top market-overview">
+                <div class="module-title"><i class="fas fa-chart-line"></i> 市场总览数据</div>
+                
+                <div class="table-group-title">签约学校数量</div>
+                <table class="stats-table">
+                    <tr>
+                        <td>小学数量</td>
+                        <td>1205</td>
+                        <td>环比增长15%</td>
+                    </tr>
+                    <tr>
+                        <td>初中数量</td>
+                        <td>680</td>
+                        <td>环比增长26%</td>
+                    </tr>
+                    <tr>
+                        <td>高中数量</td>
+                        <td>93</td>
+                        <td>环比增长67%</td>
+                    </tr>
+                </table>
+                
+                <div class="table-group-title">合作伙伴数量</div>
+                <table class="stats-table">
+                    <tr>
+                        <td>签约市级合作伙伴数量</td>
+                        <td>201</td>
+                        <td>环比增长34%</td>
+                    </tr>
+                    <tr>
+                        <td>签约省级合作伙伴数量</td>
+                        <td>19</td>
+                        <td>环比增长25%</td>
+                    </tr>
+                </table>
+                
+                <div class="table-group-title">学员与讲师数量</div>
+                <table class="stats-table">
+                    <tr>
+                        <td>培训合格讲师数量</td>
+                        <td>588</td>
+                        <td>环比增长45%</td>
+                    </tr>
+                    <tr>
+                        <td>校内学员数量</td>
+                        <td>32036</td>
+                        <td>环比增长39%</td>
+                    </tr>
+                    <tr>
+                        <td>校外学员数量</td>
+                        <td>16782</td>
+                        <td>环比增长43%</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="module middle-left-bottom">3</div>
+        </div>
+        
+        <div class="module middle-center">4</div>
+        
+        <div class="middle-right">
+            <div class="module middle-right-top">5</div>
+            <div class="module middle-right-middle">6</div>
+            <div class="module middle-right-bottom">7</div>
+        </div>
+    </div>
+    
+    <div class="bottom-section">
+        <div class="module bottom-left">8</div>
+        <div class="module bottom-center">9</div>
+        <div class="module bottom-right">10</div>
+    </div>
+    
+    <script>
+        // 更新日期时间
+        function updateDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[now.getDay()];
+            
+            const datetimeString = `${year}-${month}-${day} ${weekday} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('datetime').textContent = datetimeString;
+        }
+        
+        // 初始化并每秒更新
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>

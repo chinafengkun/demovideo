@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>具身智能课程平台指挥中心v4</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 1920px;
+            height: 1080px;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #0a0e27;
+            display: grid;
+            grid-template-rows: 5% 60% 35%;
+            overflow: hidden;
+        }
+        
+        /* 通用模块样式 */
+        .module {
+            background-color: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2196f3;
+        }
+        
+        /* 上部分 */
+        .top-section {
+            grid-row: 1;
+            background-color: rgba(33, 150, 243, 0.15);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2196f3;
+        }
+        
+        /* 中间部分 */
+        .middle-section {
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+        }
+        
+        /* 中间左边部分 */
+        .middle-left {
+            display: grid;
+            grid-template-rows: 70% 30%;
+        }
+        
+        .middle-left-top {
+            grid-row: 1;
+        }
+        
+        .middle-left-bottom {
+            grid-row: 2;
+        }
+        
+        /* 中间中央部分 */
+        .middle-center {
+            grid-column: 2;
+        }
+        
+        /* 中间右边部分 */
+        .middle-right {
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr;
+        }
+        
+        /* 下部分 */
+        .bottom-section {
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-section">1</div>
+    
+    <div class="middle-section">
+        <div class="middle-left">
+            <div class="module middle-left-top">2</div>
+            <div class="module middle-left-bottom">3</div>
+        </div>
+        
+        <div class="module middle-center">4</div>
+        
+        <div class="middle-right">
+            <div class="module middle-right-top">5</div>
+            <div class="module middle-right-middle">6</div>
+            <div class="module middle-right-bottom">7</div>
+        </div>
+    </div>
+    
+    <div class="bottom-section">
+        <div class="module bottom-left">8</div>
+        <div class="module bottom-center">9</div>
+        <div class="module bottom-right">10</div>
+    </div>
+</body>
+</html>

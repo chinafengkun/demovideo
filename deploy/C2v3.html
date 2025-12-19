@@ -1,0 +1,1032 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能教控面板</title>
+    <!-- External dependencies removed for offline use -->
+    <style>
+        /* 全局样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        /* 容器 */
+        #container {
+            margin-left: 0;
+            margin-right: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 顶部区域 */
+        .top-section {
+            height: 25vh;
+            min-height: 180px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* 中间区域 */
+        .middle-section {
+            flex: 1;
+            background: #ffffff;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        
+        /* 底部区域 */
+        .bottom-section {
+            height: auto;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px;
+            scrollbar-width: thin;
+            -ms-overflow-style: auto;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .bottom-section::-webkit-scrollbar {
+            display: auto;
+            height: 6px;
+        }
+        
+        .bottom-section::-webkit-scrollbar-thumb {
+            background-color: #007bff;
+            border-radius: 3px;
+        }
+        
+        /* 导航按钮 */
+        .nav-button {
+            padding: 10px 15px;
+            margin: 0 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            flex-shrink: 0;
+            min-width: 80px;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+        }
+        
+        .nav-button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        /* 信息行 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            min-height: 32px;
+        }
+        
+        /* 高亮文本 */
+        .highlight-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #28a745;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* 操作按钮 */
+        .action-button {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .action-button:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* 卡片标题 */
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 卡片图标 */
+        .card-icon {
+            font-size: 1.5em;
+            color: #3b82f6;
+        }
+        
+        /* 课程信息卡片 */
+        .course-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .course-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+        
+        .course-row:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .course-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .course-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .attendance {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attendance-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: #10b981;
+        }
+        
+        .attendance-total {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        /* 课件进度控制 */
+        .slideshow-progress {
+            margin-bottom: 25px;
+        }
+        
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .page-info {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 12px;
+            height: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .progress-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .progress-nav-button {
+            padding: 12px 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .progress-nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress-nav-button.prev:hover, .progress-nav-button.next:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        .progress-nav-button.jump {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .progress-nav-button.jump:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* 设备总控 */
+        .device-control {
+            margin-bottom: 25px;
+        }
+        
+        .devices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .device-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .device-item:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .device-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .device-icon.running {
+            background: #d1ecf1;
+            color: #17a2b8;
+            box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+        }
+        
+        .device-icon.idle {
+            background: #f3f4f6;
+            color: #6c757d;
+        }
+        
+        .device-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .device-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+        
+        .device-status {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .device-status.running {
+            color: #17a2b8;
+        }
+        
+        .device-status.idle {
+            color: #6c757d;
+        }
+        
+        /* 开关样式 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e7eb;
+            transition: .4s;
+            border-radius: 26px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #17a2b8;
+        }
+        
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 2px #17a2b8;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* 弹窗样式 */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e9ecef;
+        }
+        
+        .dialog-header {
+            margin-bottom: 20px;
+        }
+        
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .dialog-body {
+            margin-bottom: 20px;
+        }
+        
+        .dialog-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .dialog-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .dialog-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 16px;
+        }
+        
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .dialog-button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .dialog-button.cancel {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 1px solid #e9ecef;
+        }
+        
+        .dialog-button.cancel:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .dialog-button.confirm {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .dialog-button.confirm:hover {
+            background: #2563eb;
+        }
+        
+        /* 按钮文本样式 */
+        .button-text {
+            font-size: 12px;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="container">
+        <!-- 上部分：信息展示区 -->
+        <div class="top-section">
+            <!-- 第一行：日期时间、登录信息、操作按钮 -->
+            <div class="info-row">
+                <div>
+                    <span id="current-date">2024年12月8日</span>
+                    <span id="current-time" style="margin-left: 20px;">14:48</span>
+                </div>
+                <div>
+                    <span id="login-account">张丰</span>
+                    <button class="action-button" data-testid="logout-button" onclick="handleLogout()">
+                        <span style="font-size: 16px;">🚪</span>
+                        登出
+                    </button>
+                    <button class="action-button" data-testid="close-button" onclick="handleClose()">
+                        <span style="font-size: 16px;">❌</span>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 第二行：课程信息 -->
+            <div class="info-row">
+                <div>
+                    <span>课程：</span>
+                    <span class="highlight-text" id="course-name">AI Xbot中阶-3</span>
+                </div>
+                <div>
+                    <span>任课老师：</span>
+                    <span class="highlight-text" id="teacher-name">张丰</span>
+                </div>
+                <div>
+                    <span>助教：</span>
+                    <span class="highlight-text" id="assistant-name">王晓</span>
+                </div>
+            </div>
+            
+            <!-- 第三行：教室和人数 -->
+            <div class="info-row">
+                <div>
+                    <span>教室：</span>
+                    <span class="highlight-text" id="classroom">A301</span>
+                </div>
+                <div>
+                    <span>应到人数：</span>
+                    <span class="highlight-text" id="expected-count">24人</span>
+                </div>
+                <div>
+                    <span>实到人数：</span>
+                    <span class="highlight-text" id="actual-count">22人</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中部分：功能模块 -->
+        <div class="middle-section">
+            <!-- 课件进度控制 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">🎬</span>
+                    课件进度
+                </h2>
+                
+                <div class="progress-header">
+                    <span class="page-info">第 3/12 页</span>
+                </div>
+                
+                <div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 25%"></div>
+                    </div>
+                    <div class="progress-details">
+                        <span>进度: 25%</span>
+                        <span>预计剩余: 45分钟</span>
+                    </div>
+                </div>
+                
+                <div class="progress-buttons">
+                    <button data-testid="prev-page" class="progress-nav-button prev">
+                        <span style="font-size: 18px;">⬅️</span>
+                        <span class="button-text">上一页</span>
+                    </button>
+                    
+                    <button data-testid="jump-page" class="progress-nav-button jump">
+                        <span style="font-size: 18px;">🔢</span>
+                        <span class="button-text">跳转</span>
+                    </button>
+                    
+                    <button data-testid="next-page" class="progress-nav-button next">
+                        <span style="font-size: 18px;">➡️</span>
+                        <span class="button-text">下一页</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 设备总控 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">🎮</span>
+                    设备总控
+                </h2>
+                
+                <div class="devices">
+                    <div class="device-item">
+                        <div class="device-info">
+                            <div class="device-icon running">🤖</div>
+                            <div class="device-details">
+                                <div class="device-name">机械臂1</div>
+                                <div class="device-status running">运行中</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch" data-testid="device1-toggle">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="device-item">
+                        <div class="device-info">
+                            <div class="device-icon running">🤖</div>
+                            <div class="device-details">
+                                <div class="device-name">机械臂2</div>
+                                <div class="device-status running">运行中</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch" data-testid="device2-toggle">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="device-item">
+                        <div class="device-info">
+                            <div class="device-icon idle">🤖</div>
+                            <div class="device-details">
+                                <div class="device-name">机械臂3</div>
+                                <div class="device-status idle">待机中</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch" data-testid="device3-toggle">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="device-item">
+                        <div class="device-info">
+                            <div class="device-icon idle">🤖</div>
+                            <div class="device-details">
+                                <div class="device-name">机械臂4</div>
+                                <div class="device-status idle">待机中</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch" data-testid="device4-toggle">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <!-- 新增设备 -->
+                    <div class="device-item">
+                        <div class="device-info">
+                            <div class="device-icon running">📹</div>
+                            <div class="device-details">
+                                <div class="device-name">摄像头</div>
+                                <div class="device-status running">运行中</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch" data-testid="device5-toggle">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="device-item">
+                        <div class="device-info">
+                            <div class="device-icon idle">🔊</div>
+                            <div class="device-details">
+                                <div class="device-name">音响系统</div>
+                                <div class="device-status idle">待机中</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch" data-testid="device6-toggle">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 课程信息卡片 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    课程状态
+                </h2>
+                
+                <div class="course-details">
+                    <div class="course-row">
+                        <span class="course-label">当前章节</span>
+                        <span class="course-value">第5章 - AI视觉识别</span>
+                    </div>
+                    
+                    <div class="course-row">
+                        <span class="course-label">活跃学生</span>
+                        <span class="course-value">20人</span>
+                    </div>
+                    
+                    <div class="course-row">
+                        <span class="course-label">课堂互动</span>
+                        <span class="course-value">良好</span>
+                    </div>
+                    
+                    <div class="course-row">
+                        <span class="course-label">任务完成率</span>
+                        <span class="course-value">85%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 下部分：快速导航 -->
+        <div class="bottom-section">
+            <button class="nav-button" data-testid="nav-home" onclick="navigateTo('home')">
+                <span>🏠</span>
+                教师首页
+            </button>
+            <button class="nav-button" data-testid="nav-schedule" onclick="navigateTo('schedule')">
+                <span>📅</span>
+                课程表
+            </button>
+            <button class="nav-button" data-testid="nav-attendance" onclick="navigateTo('attendance')">
+                <span>✅</span>
+                考勤管理
+            </button>
+            <button class="nav-button" data-testid="nav-devices" onclick="navigateTo('devices')">
+                <span>🎮</span>
+                设备监控
+            </button>
+            <button class="nav-button" data-testid="nav-students" onclick="navigateTo('students')">
+                <span>👥</span>
+                学生管理
+            </button>
+            <button class="nav-button" data-testid="nav-materials" onclick="navigateTo('materials')">
+                <span>📚</span>
+                教学资料
+            </button>
+            <button class="nav-button" data-testid="nav-settings" onclick="navigateTo('settings')">
+                <span>⚙️</span>
+                设置
+            </button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentPage = 3;
+            const totalPages = 12;
+            
+            // 更新时间和日期
+            function updateDateTime() {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                const dateElement = document.getElementById('current-date');
+                const timeElement = document.getElementById('current-time');
+                
+                if (dateElement) dateElement.textContent = dateStr;
+                if (timeElement) timeElement.textContent = timeStr;
+            }
+            
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // 更新课件进度
+            function updateProgress() {
+                const progressBar = document.querySelector('.progress-fill');
+                const progressText = document.querySelector('.progress-details');
+                const pageInfo = document.querySelector('.page-info');
+                
+                if (progressBar) {
+                    const progress = (currentPage / totalPages) * 100;
+                    progressBar.style.width = progress + '%';
+                }
+                
+                if (progressText) {
+                    const progress = Math.round((currentPage / totalPages) * 100);
+                    const remainingPages = totalPages - currentPage;
+                    const estimatedMinutes = Math.ceil(remainingPages * 3.75);
+                    progressText.innerHTML = `<span>进度: ${progress}%</span><span>预计剩余: ${estimatedMinutes}分钟</span>`;
+                }
+                
+                if (pageInfo) {
+                    pageInfo.textContent = `第 ${currentPage}/${totalPages} 页`;
+                }
+            }
+            
+            // 显示跳转到页面对话框
+            function showJumpDialog() {
+                const dialog = document.createElement('div');
+                dialog.className = 'dialog-overlay';
+                dialog.innerHTML = `
+                    <div class="dialog">
+                        <div class="dialog-header">
+                            <h3 class="dialog-title">跳转到页面</h3>
+                        </div>
+                        <div class="dialog-body">
+                            <input type="number" id="pageInput" min="1" max="${totalPages}" value="${currentPage}" 
+                                   class="dialog-input">
+                            <div class="dialog-hint">请输入 1-${totalPages} 之间的页码</div>
+                        </div>
+                        <div class="dialog-actions">
+                            <button id="cancelJump" class="dialog-button cancel">
+                                取消
+                            </button>
+                            <button id="confirmJump" class="dialog-button confirm">
+                                跳转
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(dialog);
+                
+                const pageInput = document.getElementById('pageInput');
+                const cancelBtn = document.getElementById('cancelJump');
+                const confirmBtn = document.getElementById('confirmJump');
+                
+                function closeDialog() {
+                    document.body.removeChild(dialog);
+                }
+                
+                cancelBtn.addEventListener('click', closeDialog);
+                confirmBtn.addEventListener('click', function() {
+                    const newPage = parseInt(pageInput.value);
+                    if (newPage >= 1 && newPage <= totalPages) {
+                        currentPage = newPage;
+                        updateProgress();
+                        closeDialog();
+                    }
+                });
+                
+                pageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        confirmBtn.click();
+                    }
+                });
+                
+                pageInput.focus();
+                pageInput.select();
+            }
+            
+            // 切换设备状态
+            function toggleDevice(deviceId, isOn) {
+                const deviceElement = document.querySelector(`[data-testid="${deviceId}-toggle"]`).closest('.device-item');
+                const statusDiv = deviceElement.querySelector('.device-status');
+                const iconDiv = deviceElement.querySelector('.device-icon');
+                
+                if (isOn) {
+                    statusDiv.textContent = '运行中';
+                    statusDiv.className = 'device-status running';
+                    iconDiv.className = 'device-icon running';
+                } else {
+                    statusDiv.textContent = '待机中';
+                    statusDiv.className = 'device-status idle';
+                    iconDiv.className = 'device-icon idle';
+                }
+            }
+            
+            // 处理登出
+            function handleLogout() {
+                if (confirm('确定要登出吗？')) {
+                    showToast('正在登出...');
+                    setTimeout(() => {
+                        showToast('已成功登出');
+                    }, 1000);
+                }
+            }
+            
+            // 处理关闭
+            function handleClose() {
+                if (confirm('确定要关闭控制面板吗？')) {
+                    showToast('正在关闭...');
+                    setTimeout(() => {
+                        showToast('控制面板已关闭');
+                    }, 1000);
+                }
+            }
+            
+            // 导航功能
+            function navigateTo(page) {
+                const pageNames = {
+                    'home': '教师首页',
+                    'schedule': '课程表',
+                    'attendance': '考勤管理',
+                    'devices': '设备监控',
+                    'students': '学生管理',
+                    'materials': '教学资料',
+                    'settings': '设置'
+                };
+                showToast(`正在跳转到${pageNames[page] || page}...`);
+            }
+            
+            // 显示提示信息
+            function showToast(message) {
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 25px;
+                    z-index: 1000;
+                    font-size: 14px;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                }, 10);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 2000);
+            }
+            
+            // 初始化页面
+            function initPage() {
+                updateProgress();
+                
+                // 课件导航事件监听
+                document.querySelector('[data-testid="prev-page"]').addEventListener('click', function() {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updateProgress();
+                    }
+                });
+                
+                document.querySelector('[data-testid="next-page"]').addEventListener('click', function() {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updateProgress();
+                    }
+                });
+                
+                document.querySelector('[data-testid="jump-page"]').addEventListener('click', showJumpDialog);
+                
+                // 设备控制事件监听
+                for (let i = 1; i <= 6; i++) {
+                    document.querySelector(`[data-testid="device${i}-toggle"]`).addEventListener('change', function() {
+                        toggleDevice(`device${i}`, this.checked);
+                    });
+                }
+            }
+            
+            // 初始化页面
+            initPage();
+        });
+    </script>
+
+</body></html>

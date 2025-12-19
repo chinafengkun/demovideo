@@ -1,0 +1,607 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI课程仪表板</title>
+    <script>window.injectInfo = { env: "PROD" };</script><script>window.publicPath = "https://gw.alipayobjects.com/render/p/yuyan/180023180033175168/";</script><script src="https://gw.alipayobjects.com/render/p/yuyan/180023180027026141/mini-app-log.js"></script>
+    <script defer="" src="https://gw.alipayobjects.com/render/p/yuyan/180023180027026141/mini_app_base.js"></script>
+    <script defer="" src="https://gw.alipayobjects.com/render/p/yuyan/180023180000534978/tailwind4.1.13.js"></script>
+    <link href="https://gw.alipayobjects.com/render/p/yuyan/180023180003946312/material-icons.css" rel="stylesheet">
+    <style>
+        /* 全局样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 容器 */
+        #container {
+            margin-left: 0;
+            margin-right: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 顶部区域 */
+        .top-section {
+            height: 25vh;
+            min-height: 180px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* 中间区域 */
+        .middle-section {
+            flex: 1;
+            background: #ffffff;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        
+        /* 底部区域 */
+        .bottom-section {
+            height: auto;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px;
+            scrollbar-width: thin;
+            -ms-overflow-style: auto;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .bottom-section::-webkit-scrollbar {
+            display: auto;
+            height: 6px;
+        }
+        
+        .bottom-section::-webkit-scrollbar-thumb {
+            background-color: #007bff;
+            border-radius: 3px;
+        }
+        
+        /* 导航按钮 */
+        .nav-button {
+            padding: 10px 15px;
+            margin: 0 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            flex-shrink: 0;
+            min-width: 80px;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+        }
+        
+        .nav-button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        /* 信息行 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            min-height: 32px;
+        }
+        
+        /* 高亮文本 */
+        .highlight-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #28a745;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* 操作按钮 */
+        .action-button {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .action-button:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* 卡片标题 */
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 卡片图标 */
+        .card-icon {
+            font-size: 1.5em;
+            color: #3b82f6;
+        }
+        
+        /* 仪表网格 */
+        .gauges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        /* 仪表容器 */
+        .gauge-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .gauge-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        
+        /* 仪表头部 */
+        .gauge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        /* 仪表标题 */
+        .gauge-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-green { background: #10b981; }
+        .status-yellow { background: #f59e0b; }
+        .status-red { background: #ef4444; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        /* 仪表内容 */
+        .gauge-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* 仪表信息 */
+        .gauge-info {
+            position: absolute;
+            text-align: center;
+        }
+        
+        /* 成功率 */
+        .success-rate {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* 训练时间 */
+        .training-time {
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+        
+        /* 错误分类 */
+        .error-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        
+        /* 错误类别 */
+        .error-category {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid;
+            transition: transform 0.2s ease;
+        }
+        
+        .error-category:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* 类别边框颜色 */
+        .category-critical { border-left-color: #ef4444; }
+        .category-warning { border-left-color: #f59e0b; }
+        .category-info { border-left-color: #3b82f6; }
+        
+        /* 类别标题 */
+        .category-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2c3e50;
+        }
+        
+        /* 类别数量 */
+        .category-count {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* 错误部分 */
+        .error-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* 数据高亮 */
+        .data-highlight {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        /* 错误项 */
+        .error-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            background: white;
+            border-left: 4px solid;
+        }
+        
+        /* 错误类型边框颜色 */
+        .error-critical { border-left-color: #ef4444; }
+        .error-warning { border-left-color: #f59e0b; }
+        .error-info { border-left-color: #3b82f6; }
+        
+        /* 底部链接 */
+        .bottom-section a {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        /* 取消默认material icons样式 */
+        .material-icons {
+            font-size: 20px !important;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .gauges-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .error-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<script>
+    window.artifactId = "flashapp-0b0788ac26e140a6";
+    window.artifactVersion = "2";
+    window.trace_id = "219fd38317652659123554531e24ff";
+</script>
+<meta http-equiv="Content-Security-Policy" content="
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: *.alipay.com *.alipayobjects.com  *.amap.com *.lingguang.com *.lingguangcontent.com;
+  frame-src 'self' data: blob: *.alipay.com *.alipayobjects.com *.amap.com *.lingguang.com *.lingguangcontent.com;
+  connect-src 'self' data: blob: *.alipay.com *.alipayobjects.com  *.amap.com *.lingguang.com *.lingguangcontent.com;
+  child-src 'self' data: blob: *.alipay.com *.alipayobjects.com  *.amap.com *.lingguang.com *.lingguangcontent.com;
+  object-src 'self' data: blob: *.alipay.com *.alipayobjects.com  *.amap.com *.lingguang.com *.lingguangcontent.com;
+  base-uri 'self' *.alipay.com *.alipayobjects.com *.amap.com *.lingguang.com *.lingguangcontent.com;
+  form-action 'none';
+  upgrade-insecure-requests;
+">
+
+</head>
+<body>
+    <div id="container" class="container">
+        <!-- 上部分：信息展示区 -->
+        <div class="top-section">
+            <!-- 第一行：日期时间、登录信息、操作按钮 -->
+            <div class="info-row">
+                <div>
+                    <span id="datetime" class="text-sm"></span>
+                    <span style="margin-left: 20px;">登录用户：<span class="data-highlight">张丰</span></span>
+                </div>
+                <div>
+                    <button data-testid="logout-btn" class="action-button">
+                        <span style="font-size: 16px;">🚪</span>
+                        登出
+                    </button>
+                    <button data-testid="close-btn" class="action-button">
+                        <span style="font-size: 16px;">❌</span>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 第二行：课程信息 -->
+            <div class="info-row">
+                <div>
+                    <span>课程：</span>
+                    <span class="highlight-text" id="course-name">AI Xbot中阶-3</span>
+                </div>
+                <div>
+                    <span>任课老师：</span>
+                    <span class="highlight-text" id="teacher-name">张丰</span>
+                </div>
+                <div>
+                    <span>助教：</span>
+                    <span class="highlight-text" id="assistant-name">王晓</span>
+                </div>
+            </div>
+            
+            <!-- 第三行：教室和人数 -->
+            <div class="info-row">
+                <div>
+                    <span>教室：</span>
+                    <span class="highlight-text" id="classroom">A301</span>
+                </div>
+                <div>
+                    <span>应到人数：</span>
+                    <span class="highlight-text" id="expected-count">24人</span>
+                </div>
+                <div>
+                    <span>实到人数：</span>
+                    <span class="highlight-text" id="actual-count">22人</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中部分：功能模块 -->
+        <div class="middle-section">
+            <!-- 机械臂训练状态监控 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    机械臂训练状态监控
+                </h2>
+                
+                <div class="gauges-grid">
+                    <div class="gauge-container">
+                        <div class="gauge-header">
+                            <div class="gauge-title">Group A</div>
+                            <div class="status-indicator status-green" data-testid="status-a"></div>
+                        </div>
+                        <div class="gauge-content">
+                            <canvas id="gauge-a" width="150" height="150"></canvas>
+                            <div class="gauge-info">
+                                <div class="success-rate" data-testid="rate-a">87%</div>
+                                <div class="training-time" data-testid="time-a">训练时长: 2h 35m</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gauge-container">
+                        <div class="gauge-header">
+                            <div class="gauge-title">Group B</div>
+                            <div class="status-indicator status-yellow" data-testid="status-b"></div>
+                        </div>
+                        <div class="gauge-content">
+                            <canvas id="gauge-b" width="150" height="150"></canvas>
+                            <div class="gauge-info">
+                                <div class="success-rate" data-testid="rate-b">72%</div>
+                                <div class="training-time" data-testid="time-b">训练时长: 2h 12m</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gauge-container">
+                        <div class="gauge-header">
+                            <div class="gauge-title">Group C</div>
+                            <div class="status-indicator status-red" data-testid="status-c"></div>
+                        </div>
+                        <div class="gauge-content">
+                            <canvas id="gauge-c" width="150" height="150"></canvas>
+                            <div class="gauge-info">
+                                <div class="success-rate" data-testid="rate-c">45%</div>
+                                <div class="training-time" data-testid="time-c">训练时长: 1h 48m</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gauge-container">
+                        <div class="gauge-header">
+                            <div class="gauge-title">Group D</div>
+                            <div class="status-indicator status-green" data-testid="status-d"></div>
+                        </div>
+                        <div class="gauge-content">
+                            <canvas id="gauge-d" width="150" height="150"></canvas>
+                            <div class="gauge-info">
+                                <div class="success-rate" data-testid="rate-d">93%</div>
+                                <div class="training-time" data-testid="time-d">训练时长: 2h 42m</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统状态监控 -->
+            <div class="error-section">
+                <h3 class="card-title" style="margin-bottom: 20px;">
+                    <span class="card-icon">⚠️</span>
+                    系统状态监控
+                </h3>
+                <div class="error-categories">
+                    <div class="error-category category-critical">
+                        <div class="category-title">
+                            <span style="font-size: 18px;">❌</span>
+                            严重错误
+                        </div>
+                        <div class="category-count" data-testid="critical-count">0</div>
+                    </div>
+                    <div class="error-category category-warning">
+                        <div class="category-title">
+                            <span style="font-size: 18px;">⏰</span>
+                            通信超时
+                        </div>
+                        <div class="category-count" data-testid="timeout-count">3</div>
+                    </div>
+                    <div class="error-category category-warning">
+                        <div class="category-title">
+                            <span style="font-size: 18px;">📡</span>
+                            传感器漂移
+                        </div>
+                        <div class="category-count" data-testid="sensor-count">1</div>
+                    </div>
+                    <div class="error-category category-info">
+                        <div class="category-title">
+                            <span style="font-size: 18px;">🌡️</span>
+                            电机过热
+                        </div>
+                        <div class="category-count" data-testid="motor-count">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 下部分：快速导航 -->
+        <div class="bottom-section">
+            <button class="nav-button" data-testid="nav-home" onclick="navigateTo('home')">
+                <span>🏠</span>
+                教师首页
+            </button>
+            <button class="nav-button" data-testid="nav-schedule" onclick="navigateTo('schedule')">
+                <span>📅</span>
+                课程表
+            </button>
+            <button class="nav-button" data-testid="nav-attendance" onclick="navigateTo('attendance')">
+                <span>✅</span>
+                考勤管理
+            </button>
+            <button class="nav-button" data-testid="nav-devices" onclick="navigateTo('devices')">
+                <span>🎮</span>
+                设备监控
+            </button>
+            <button class="nav-button" data-testid="nav-training" onclick="navigateTo('training')">
+                <span>🤖</span>
+                训练监控
+            </button>
+            <button class="nav-button" data-testid="nav-students" onclick="navigateTo('students')">
+                <span>👥</span>
+                学生管理
+            </button>
+            <button class="nav-button" data-testid="nav-settings" onclick="navigateTo('settings')">
+                <span>⚙️</span>
+                设置
+            </button>
+        </div>
+    </div>
+
+    <script src="https://gw.alipayobjects.com/render/p/yuyan/180023180033175168/app.js"></script>
+    
+    <script>
+        // 更新日期时间
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const datetimeElement = document.getElementById('datetime');
+            if (datetimeElement) {
+                datetimeElement.textContent = `${dateStr} ${timeStr}`;
+            }
+        }
+        
+        // 导航功能
+        function navigateTo(page) {
+            const pageNames = {
+                'home': '教师首页',
+                'schedule': '课程表',
+                'attendance': '考勤管理',
+                'devices': '设备监控',
+                'training': '训练监控',
+                'students': '学生管理',
+                'settings': '设置'
+            };
+            
+            // 显示跳转提示
+            alert(`正在跳转到${pageNames[page] || page}...`);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新日期时间
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+    </script>
+
+</body></html>

@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>具身智能课程平台指挥中心v4.4</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 1920px;
+            height: 1080px;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #0a0e27;
+            display: grid;
+            grid-template-rows: 54px 648px 378px; /* 5%→54px, 60%→648px, 35%→378px */
+            overflow: hidden;
+        }
+        
+        /* 通用模块样式 */
+        .module {
+            background-color: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            padding: 12px;
+            overflow: hidden;
+        }
+        
+        /* 模块标题样式 */
+        .module-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #2196f3;
+        }
+        
+        /* 表格样式 */
+        .stats-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: 16px;
+        }
+        
+        .stats-table td {
+            padding: 6px 0;
+            border: none;
+            vertical-align: middle;
+        }
+        
+        .stats-table td:first-child {
+            text-align: left;
+            font-size: 14px;
+            color: #90caf9;
+            width: 50%;
+        }
+        
+        .stats-table td:nth-child(2),
+        .stats-table td:nth-child(3) {
+            text-align: right;
+            font-size: 20px;
+            color: #4caf50;
+            width: 25%;
+        }
+        
+        .stats-table td:nth-child(3) {
+            font-size: 13px;
+        }
+        
+        /* 市场总览特殊样式 */
+        .market-overview {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .table-group-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin: 8px 0 4px 0;
+            color: #2196f3;
+        }
+        
+        .table-group-title:first-child {
+            margin-top: 0;
+        }
+        
+        /* 上部分 */
+        .top-section {
+            grid-row: 1;
+            background-color: rgba(33, 150, 243, 0.15);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #2196f3;
+            padding: 0 24px; /* 左右各留一个汉字大小的间距 */
+        }
+        
+        /* 顶部左侧日期时间 */
+        .top-left {
+            font-size: 20px;
+        }
+        
+        /* 顶部中间标题 */
+        .top-center {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        /* 顶部右侧登录信息 */
+        .top-right {
+            font-size: 20px;
+        }
+        
+        /* 中间部分 */
+        .middle-section {
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: 384px 1152px 384px; /* 20%→384px, 60%→1152px, 20%→384px */
+        }
+        
+        /* 中间左边部分 */
+        .middle-left {
+            display: grid;
+            grid-template-rows: 453px 195px; /* 70%→453px, 30%→195px */
+        }
+        
+        .middle-left-top {
+            grid-row: 1;
+        }
+        
+        .middle-left-bottom {
+            grid-row: 2;
+        }
+        
+        /* 中间中央部分 */
+        .middle-center {
+            grid-column: 2;
+        }
+        
+        /* 中间右边部分 */
+        .middle-right {
+            display: grid;
+            grid-template-rows: 216px 216px 216px; /* 1/3 each → 216px */
+        }
+        
+        /* 下部分 */
+        .bottom-section {
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 640px 640px 640px; /* 1/3 each → 640px */
+        }
+        
+        /* 行课状态模块样式 */
+        .teaching-table {
+            overflow: hidden;
+            height: calc(100% - 40px);
+        }
+        
+        /* 行课状态滚动容器 */
+        .teaching-table .scroll-container { animation: scroll 86s linear infinite; }
+        
+        /* 重要事件滚动容器 */
+        .events-container .scroll-container {
+            animation: scroll-events 36s linear infinite;
+        }
+        
+        /* 悬停暂停效果 */
+        .events-container:hover .scroll-container {
+            animation-play-state: paused;
+        }
+        
+        /* 滚动动画 - 10所学校，每所停留5秒，滚动速度1行/秒 */
+        /* 每所学校的行数：4+3+3+3+4+4+4+3+4+4 = 36行 */
+        /* 滚动时间：36行 * 1秒/行 = 36秒 */
+        /* 停留时间：10所 * 5秒/所 = 50秒 */
+        /* 总时间：36 + 50 = 86秒 */
+        /* 重要事件垂直滚动动画 - 12个事件，每个停留3秒，总时长36秒 */
+        @keyframes scroll-events {
+            0%, 8.33% { transform: translateY(0); } /* 事件1停留3秒 */
+            8.34%, 16.67% { transform: translateY(-60px); } /* 事件2停留3秒 */
+            16.68%, 25% { transform: translateY(-120px); } /* 事件3停留3秒 */
+            25.01%, 33.33% { transform: translateY(-180px); } /* 事件4停留3秒 */
+            33.34%, 41.67% { transform: translateY(-240px); } /* 事件5停留3秒 */
+            41.68%, 50% { transform: translateY(-300px); } /* 事件6停留3秒 */
+            50.01%, 58.33% { transform: translateY(-360px); } /* 事件7停留3秒 */
+            58.34%, 66.67% { transform: translateY(-420px); } /* 事件8停留3秒 */
+            66.68%, 75% { transform: translateY(-480px); } /* 事件9停留3秒 */
+            75.01%, 83.33% { transform: translateY(-540px); } /* 事件10停留3秒 */
+            83.34%, 91.67% { transform: translateY(-600px); } /* 事件11停留3秒 */
+            91.68%, 100% { transform: translateY(-660px); } /* 事件12停留3秒 */
+        }
+        
+        /* 滚动动画 - 10所学校，每所停留5秒，滚动速度1行/秒 */
+        @keyframes scroll {
+            /* 历城区实验小学 - 4行 */
+            0%, 5% { transform: translateY(0); } /* 停留5秒 */
+            
+            /* 滚动到行知小学 - 3行 */
+            6%, 11% { transform: translateY(-130px); } /* 滚动4行(4秒) + 停留5秒 */
+            
+            /* 滚动到安生学校初中部 - 3行 */
+            12%, 17% { transform: translateY(-240px); } /* 滚动3行(3秒) + 停留5秒 */
+            
+            /* 滚动到外国语学校小学部 - 3行 */
+            18%, 23% { transform: translateY(-350px); } /* 滚动3行(3秒) + 停留5秒 */
+            
+            /* 滚动到龙鼎小学 - 4行 */
+            24%, 29% { transform: translateY(-460px); } /* 滚动3行(3秒) + 停留5秒 */
+            
+            /* 滚动到锦绣明湖小学 - 4行 */
+            30%, 35% { transform: translateY(-600px); } /* 滚动4行(4秒) + 停留5秒 */
+            
+            /* 滚动到宝华小学 - 4行 */
+            36%, 41% { transform: translateY(-740px); } /* 滚动4行(4秒) + 停留5秒 */
+            
+            /* 滚动到爱都小学 - 3行 */
+            42%, 47% { transform: translateY(-880px); } /* 滚动4行(4秒) + 停留5秒 */
+            
+            /* 滚动到兴麓小学 - 4行 */
+            48%, 53% { transform: translateY(-990px); } /* 滚动3行(3秒) + 停留5秒 */
+            
+            /* 滚动到燕山小学 - 4行 */
+            54%, 59% { transform: translateY(-1130px); } /* 滚动4行(4秒) + 停留5秒 */
+            
+            /* 滚动回顶部 */
+            60%, 86% { transform: translateY(0); } /* 滚动4行(4秒) + 停留22秒(回到起点) */
+        }
+        
+        /* 学校区域样式 */
+        .school-section {
+            margin-bottom: 20px;
+            height: 100%;
+        }
+        
+        .school-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2196f3;
+        }
+        
+        /* 行课状态表格样式 */
+        .course-table {
+            border-collapse: collapse;
+            width: calc(100% - 40px); /* 左右各留2个汉字宽度的留白 */
+            margin: 0 20px;
+            font-size: 15px; /* 比参考文件10px增加50% */
+        }
+        
+        .course-table th, .course-table td {
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(33, 150, 243, 0.3);
+            white-space: nowrap;
+        }
+        
+        .course-table th {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            font-weight: bold;
+        }
+        
+        .course-table td {
+            color: #ffffff;
+        }
+        
+        .status-good {
+            color: #4caf50;
+        }
+        
+        .status-bad {
+            color: #f44336;
+        }
+        
+        /* 重要事件模块样式 */
+        .events-container {
+            flex: 1;
+            overflow: hidden;
+            padding: 0 16px; /* 左右各一个汉字宽度的边距 */
+        }
+        
+        .event-item {
+            display: flex;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(33, 150, 243, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #2196f3;
+        }
+        
+        .event-number {
+            font-size: 14.4px; /* 参考设计16px的90% */
+            font-weight: bold;
+            color: #2196f3;
+            margin-right: 10px;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .event-content {
+            font-size: 12.6px; /* 参考设计14px的90% */
+            line-height: 1.5;
+        }
+        
+        /* 为不同事件项设置不同颜色 - 红色、黄色、白色循环 */
+        .event-item:nth-child(3n+1) .event-content { color: #ff4757; } /* 红色 */
+        .event-item:nth-child(3n+2) .event-content { color: #ffa502; } /* 黄色 */
+        .event-item:nth-child(3n) .event-content { color: #ffffff; } /* 白色 */
+        
+        /* 视频巡检模块样式 */
+        .video-container {
+            width: 100%;
+            height: calc(100% - 40px);
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .video-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        .classroom-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            letter-spacing: 1px;
+        }
+        
+        .video-status {
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            letter-spacing: 1px;
+        }
+        
+        /* 图片滚动容器样式 */
+        .image-scroll-container {
+            width: 100%;
+            height: calc(100% - 30px);
+            overflow: hidden;
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .image-scroll-wrapper {
+            display: flex;
+            width: fit-content;
+            height: 100%;
+            animation: scrollImages 30s linear infinite;
+        }
+        
+        .scroll-image-item {
+            flex-shrink: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .scroll-image-item img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        /* 横向滚动动画 */
+        @keyframes scrollImages {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-600%); /* 6个图片，每个占100%宽度 */
+            }
+        }
+        
+        /* 悬停暂停动画 */
+        .image-scroll-container:hover .image-scroll-wrapper {
+            animation-play-state: paused;
+        }
+        
+        /* 系统健康模块样式 */
+        .system-health-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: calc(100% - 30px);
+            gap: 10px;
+        }
+        
+        .health-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 11%;
+            height: 100%;
+        }
+        
+        .health-label {
+            font-size: 12px;
+            color: #90caf9;
+            margin-bottom: 8px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .health-tank {
+            position: relative;
+            width: 100%;
+            height: 80%;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .health-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            border-radius: 0 0 4px 4px;
+            transition: all 0.5s ease;
+        }
+        
+        .health-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+        }
+        
+        /* 填充脉冲动画 */
+        @keyframes fillPulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        
+        /* 客服模块样式 */
+        .customer-service-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 15px;
+            height: calc(100% - 30px);
+            padding: 5px;
+        }
+        
+        .service-item {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 10px;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .service-label {
+            font-size: 12px;
+            color: #90caf9;
+            margin-bottom: 8px;
+        }
+        
+        .service-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        
+        /* 问题等级分布 */
+        .problem-levels {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .level-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .level-label {
+            font-size: 10px;
+            color: #90caf9;
+            margin-bottom: 4px;
+        }
+        
+        .level-value {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .level-value.urgent {
+            background-color: #ff5722;
+            color: white;
+        }
+        
+        .level-value.important {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        .level-value.normal {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        /* 异常问题 */
+        .problem-issues {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .issue-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .issue-label {
+            font-size: 10px;
+            color: #90caf9;
+            margin-bottom: 4px;
+        }
+        
+        .issue-value {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .issue-value.timeout {
+            background-color: #ff5722;
+            color: white;
+        }
+        
+        .issue-value.unsatisfied {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        /* 报警子模块 */
+        .alarm-module {
+            grid-column: 1 / -1;
+            background-color: rgba(255, 87, 34, 0.1);
+            border: 1px solid rgba(255, 87, 34, 0.5);
+            border-radius: 4px;
+            padding: 12px;
+            animation: alarmPulse 1s ease-in-out infinite;
+        }
+        
+        .alarm-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .alarm-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff5722;
+        }
+        
+        /* 闪烁红灯动画 */
+        @keyframes blinking-red {
+            0%, 50% {
+                opacity: 1;
+                box-shadow: 0 0 5px rgba(255, 87, 34, 0.8), 0 0 10px rgba(255, 87, 34, 0.5);
+            }
+            51%, 100% {
+                opacity: 0.3;
+                box-shadow: none;
+            }
+        }
+        
+        .blinking-red {
+            animation: blinking-red 1s ease-in-out infinite;
+        }
+        
+        /* 报警脉冲动画 */
+        @keyframes alarmPulse {
+            0%, 50% {
+                background-color: rgba(255, 87, 34, 0.1);
+                border-color: rgba(255, 87, 34, 0.5);
+            }
+            51%, 100% {
+                background-color: rgba(255, 87, 34, 0.05);
+                border-color: rgba(255, 87, 34, 0.3);
+            }
+        }
+        
+        .alarm-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff5722;
+        }
+        
+        .alarm-text {
+            font-size: 14px;
+            color: white;
+            margin-bottom: 4px;
+        }
+        
+        .alarm-text-detail {
+            font-size: 12px;
+            color: #ff9800;
+            margin-bottom: 0;
+        }
+        
+        .alarm-details {
+            font-size: 12px;
+        }
+        
+        .alarm-detail-item {
+            display: flex;
+            margin-bottom: 4px;
+        }
+        
+        .detail-label {
+            color: #90caf9;
+            width: 80px;
+        }
+        
+        .detail-value {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-section">
+        <div class="top-left" id="datetime">2025-12-15 星期一 10:00:00</div>
+        <div class="top-center">具身智能课程平台运行监控中心</div>
+        <div class="top-right">登录账号：卢潇</div>
+    </div>
+    
+    <div class="middle-section">
+        <div class="middle-left">
+            <div class="module middle-left-top market-overview">
+                <div class="module-title"><i class="fas fa-chart-line"></i> 市场总览数据</div>
+                
+                <div class="table-group-title">签约学校数量</div>
+                <table class="stats-table">
+                    <tr>
+                        <td>小学数量</td>
+                        <td>1205</td>
+                        <td>环比增长15%</td>
+                    </tr>
+                    <tr>
+                        <td>初中数量</td>
+                        <td>680</td>
+                        <td>环比增长26%</td>
+                    </tr>
+                    <tr>
+                        <td>高中数量</td>
+                        <td>93</td>
+                        <td>环比增长67%</td>
+                    </tr>
+                </table>
+                
+                <div class="table-group-title">合作伙伴数量</div>
+                <table class="stats-table">
+                    <tr>
+                        <td>签约市级合作伙伴数量</td>
+                        <td>201</td>
+                        <td>环比增长34%</td>
+                    </tr>
+                    <tr>
+                        <td>签约省级合作伙伴数量</td>
+                        <td>19</td>
+                        <td>环比增长25%</td>
+                    </tr>
+                </table>
+                
+                <div class="table-group-title">学员与讲师数量</div>
+                <table class="stats-table">
+                    <tr>
+                        <td>培训合格讲师数量</td>
+                        <td>588</td>
+                        <td>环比增长45%</td>
+                    </tr>
+                    <tr>
+                        <td>校内学员数量</td>
+                        <td>32036</td>
+                        <td>环比增长39%</td>
+                    </tr>
+                    <tr>
+                        <td>校外学员数量</td>
+                        <td>16782</td>
+                        <td>环比增长43%</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="module middle-left-bottom">
+                <div class="module-title"><i class="fas fa-user-graduate"></i> 进阶课程在读学员</div>
+                <div class="chart-container">
+                    <svg width="340" height="140" viewBox="0 0 340 140" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Y轴刻度线 -->
+                        <line x1="30" y1="10" x2="30" y2="120" stroke="rgba(33, 150, 243, 0.5)" stroke-width="1"/>
+                        <line x1="30" y1="10" x2="25" y2="10" stroke="rgba(33, 150, 243, 0.8)" stroke-width="2"/>
+                        <line x1="30" y1="45" x2="27" y2="45" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="30" y1="80" x2="27" y2="80" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="30" y1="120" x2="25" y2="120" stroke="rgba(33, 150, 243, 0.8)" stroke-width="2"/>
+                        
+                        <!-- Y轴标签 -->
+                        <text x="20" y="15" font-size="10" fill="#90caf9" text-anchor="end">16000</text>
+                        <text x="20" y="50" font-size="10" fill="#90caf9" text-anchor="end">12000</text>
+                        <text x="20" y="85" font-size="10" fill="#90caf9" text-anchor="end">8000</text>
+                        <text x="20" y="125" font-size="10" fill="#90caf9" text-anchor="end">4000</text>
+                        
+                        <!-- X轴刻度线 -->
+                        <line x1="30" y1="120" x2="320" y2="120" stroke="rgba(33, 150, 243, 0.5)" stroke-width="1"/>
+                        <line x1="60" y1="120" x2="60" y2="125" stroke="rgba(33, 150, 243, 0.8)" stroke-width="2"/>
+                        <line x1="100" y1="120" x2="100" y2="123" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="140" y1="120" x2="140" y2="123" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="180" y1="120" x2="180" y2="123" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="220" y1="120" x2="220" y2="123" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="260" y1="120" x2="260" y2="123" stroke="rgba(33, 150, 243, 0.8)" stroke-width="1"/>
+                        <line x1="300" y1="120" x2="300" y2="125" stroke="rgba(33, 150, 243, 0.8)" stroke-width="2"/>
+                        
+                        <!-- X轴标签 -->
+                        <text x="60" y="135" font-size="10" fill="#90caf9" text-anchor="middle">6月</text>
+                        <text x="100" y="135" font-size="10" fill="#90caf9" text-anchor="middle">7月</text>
+                        <text x="140" y="135" font-size="10" fill="#90caf9" text-anchor="middle">8月</text>
+                        <text x="180" y="135" font-size="10" fill="#90caf9" text-anchor="middle">9月</text>
+                        <text x="220" y="135" font-size="10" fill="#90caf9" text-anchor="middle">10月</text>
+                        <text x="260" y="135" font-size="10" fill="#90caf9" text-anchor="middle">11月</text>
+                        <text x="300" y="135" font-size="10" fill="#90caf9" text-anchor="middle">12月</text>
+                        
+                        <!-- 网格线 -->
+                        <line x1="30" y1="45" x2="320" y2="45" stroke="rgba(33, 150, 243, 0.2)" stroke-width="1" stroke-dasharray="2,2"/>
+                        <line x1="30" y1="80" x2="320" y2="80" stroke="rgba(33, 150, 243, 0.2)" stroke-width="1" stroke-dasharray="2,2"/>
+                        
+                        <!-- 折线图数据点 -->
+                        <!-- 6月: 5060 -->
+                        <circle cx="60" cy="100" r="3" fill="#2196f3"/>
+                        <text x="60" y="95" font-size="9" fill="#4caf50" text-anchor="middle">5060</text>
+                        
+                        <!-- 7月: 6200 -->
+                        <circle cx="100" cy="94" r="3" fill="#2196f3"/>
+                        <text x="100" y="89" font-size="9" fill="#4caf50" text-anchor="middle">6200</text>
+                        
+                        <!-- 8月: 7150 -->
+                        <circle cx="140" cy="89" r="3" fill="#2196f3"/>
+                        <text x="140" y="84" font-size="9" fill="#4caf50" text-anchor="middle">7150</text>
+                        
+                        <!-- 9月: 8500 -->
+                        <circle cx="180" cy="82" r="3" fill="#2196f3"/>
+                        <text x="180" y="77" font-size="9" fill="#4caf50" text-anchor="middle">8500</text>
+                        
+                        <!-- 10月: 10200 -->
+                        <circle cx="220" cy="73" r="3" fill="#2196f3"/>
+                        <text x="220" y="68" font-size="9" fill="#4caf50" text-anchor="middle">10200</text>
+                        
+                        <!-- 11月: 12800 -->
+                        <circle cx="260" cy="59" r="3" fill="#2196f3"/>
+                        <text x="260" y="54" font-size="9" fill="#4caf50" text-anchor="middle">12800</text>
+                        
+                        <!-- 12月: 15240 -->
+                        <circle cx="300" cy="45" r="3" fill="#2196f3"/>
+                        <text x="300" y="40" font-size="9" fill="#4caf50" text-anchor="middle">15240</text>
+                        
+                        <!-- 折线 -->
+                        <path d="M60,100 Q80,97 100,94 Q120,91.5 140,89 Q160,85.5 180,82 Q200,77.5 220,73 Q240,66 260,59 Q280,52 300,45" 
+                              stroke="#2196f3" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <div class="module middle-center">
+            <div class="module-title"><i class="fas fa-school"></i> 行课状态</div>
+            <div class="teaching-table">
+                <div class="scroll-container">
+                    <!-- 历城区实验小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">历城区实验小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>二年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>张老师</td>
+                                    <td>李助教</td>
+                                    <td>42</td>
+                                    <td>95%</td>
+                                    <td>980+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>765</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人竞赛</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>刘老师</td>
+                                    <td>陈助教</td>
+                                    <td>38</td>
+                                    <td>88%</td>
+                                    <td>1500+</td>
+                                    <td>80%</td>
+                                    <td>部分损坏</td>
+                                    <td>1100</td>
+                                    <td><span class="status-bad"><i class="fas fa-exclamation"></i> 需关注</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>周老师</td>
+                                    <td>吴助教</td>
+                                    <td>40</td>
+                                    <td>92%</td>
+                                    <td>1100+</td>
+                                    <td>68%</td>
+                                    <td>完好</td>
+                                    <td>890</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>机器人创新</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>郑老师</td>
+                                    <td>钱助教</td>
+                                    <td>35</td>
+                                    <td>85%</td>
+                                    <td>1300+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>980</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 行知小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">行知小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>王老师</td>
+                                    <td>赵助教</td>
+                                    <td>38</td>
+                                    <td>93%</td>
+                                    <td>1020+</td>
+                                    <td>78%</td>
+                                    <td>完好</td>
+                                    <td>850</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>孙老师</td>
+                                    <td>周助教</td>
+                                    <td>35</td>
+                                    <td>89%</td>
+                                    <td>1200+</td>
+                                    <td>70%</td>
+                                    <td>完好</td>
+                                    <td>920</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>吴老师</td>
+                                    <td>郑助教</td>
+                                    <td>32</td>
+                                    <td>87%</td>
+                                    <td>1100+</td>
+                                    <td>75%</td>
+                                    <td>部分损坏</td>
+                                    <td>880</td>
+                                    <td><span class="status-bad"><i class="fas fa-exclamation"></i> 需关注</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 安生学校初中部 -->
+                    <div class="school-section">
+                        <h3 class="school-name">安生学校初中部</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>初一</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>陈老师</td>
+                                    <td>林助教</td>
+                                    <td>45</td>
+                                    <td>91%</td>
+                                    <td>1250+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>1050</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>初二</td>
+                                    <td>机器人竞赛</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>林老师</td>
+                                    <td>黄助教</td>
+                                    <td>40</td>
+                                    <td>90%</td>
+                                    <td>1400+</td>
+                                    <td>78%</td>
+                                    <td>完好</td>
+                                    <td>1120</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>初三</td>
+                                    <td>人工智能应用</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>黄老师</td>
+                                    <td>梁助教</td>
+                                    <td>36</td>
+                                    <td>88%</td>
+                                    <td>1300+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>1080</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 外国语学校小学部 -->
+                    <div class="school-section">
+                        <h3 class="school-name">外国语学校小学部</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>一年级</td>
+                                    <td>机器人启蒙</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>杨老师</td>
+                                    <td>苏助教</td>
+                                    <td>48</td>
+                                    <td>94%</td>
+                                    <td>980+</td>
+                                    <td>68%</td>
+                                    <td>完好</td>
+                                    <td>780</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>二年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>朱老师</td>
+                                    <td>吕助教</td>
+                                    <td>45</td>
+                                    <td>92%</td>
+                                    <td>1050+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>820</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>秦老师</td>
+                                    <td>马助教</td>
+                                    <td>42</td>
+                                    <td>90%</td>
+                                    <td>1150+</td>
+                                    <td>76%</td>
+                                    <td>完好</td>
+                                    <td>900</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 龙鼎小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">龙鼎小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>二年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>尤老师</td>
+                                    <td>许助教</td>
+                                    <td>39</td>
+                                    <td>91%</td>
+                                    <td>980+</td>
+                                    <td>70%</td>
+                                    <td>完好</td>
+                                    <td>760</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>许老师</td>
+                                    <td>何助教</td>
+                                    <td>37</td>
+                                    <td>89%</td>
+                                    <td>1050+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>820</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>何老师</td>
+                                    <td>郭助教</td>
+                                    <td>35</td>
+                                    <td>88%</td>
+                                    <td>1100+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>850</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>机器人创新</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>郭老师</td>
+                                    <td>程助教</td>
+                                    <td>32</td>
+                                    <td>86%</td>
+                                    <td>1200+</td>
+                                    <td>78%</td>
+                                    <td>部分损坏</td>
+                                    <td>900</td>
+                                    <td><span class="status-bad"><i class="fas fa-exclamation"></i> 需关注</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 锦绣明湖小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">锦绣明湖小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>二年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>程老师</td>
+                                    <td>傅助教</td>
+                                    <td>41</td>
+                                    <td>93%</td>
+                                    <td>1050+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>850</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>傅老师</td>
+                                    <td>丁助教</td>
+                                    <td>38</td>
+                                    <td>90%</td>
+                                    <td>1150+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>920</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>丁老师</td>
+                                    <td>潘助教</td>
+                                    <td>36</td>
+                                    <td>88%</td>
+                                    <td>1200+</td>
+                                    <td>70%</td>
+                                    <td>完好</td>
+                                    <td>880</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>机器人创新</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>潘老师</td>
+                                    <td>袁助教</td>
+                                    <td>33</td>
+                                    <td>87%</td>
+                                    <td>1300+</td>
+                                    <td>78%</td>
+                                    <td>完好</td>
+                                    <td>950</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 宝华小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">宝华小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>二年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>袁老师</td>
+                                    <td>蒋助教</td>
+                                    <td>38</td>
+                                    <td>92%</td>
+                                    <td>980+</td>
+                                    <td>68%</td>
+                                    <td>完好</td>
+                                    <td>760</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>蒋老师</td>
+                                    <td>沈助教</td>
+                                    <td>35</td>
+                                    <td>89%</td>
+                                    <td>1050+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>820</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>沈老师</td>
+                                    <td>韩助教</td>
+                                    <td>33</td>
+                                    <td>87%</td>
+                                    <td>1100+</td>
+                                    <td>70%</td>
+                                    <td>部分损坏</td>
+                                    <td>850</td>
+                                    <td><span class="status-bad"><i class="fas fa-exclamation"></i> 需关注</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>机器人创新</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>韩老师</td>
+                                    <td>杨助教</td>
+                                    <td>30</td>
+                                    <td>85%</td>
+                                    <td>1150+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>880</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 爱都小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">爱都小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>杨老师</td>
+                                    <td>朱助教</td>
+                                    <td>42</td>
+                                    <td>94%</td>
+                                    <td>1080+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>880</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>朱老师</td>
+                                    <td>秦助教</td>
+                                    <td>40</td>
+                                    <td>91%</td>
+                                    <td>1200+</td>
+                                    <td>76%</td>
+                                    <td>完好</td>
+                                    <td>950</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>秦老师</td>
+                                    <td>尤助教</td>
+                                    <td>37</td>
+                                    <td>89%</td>
+                                    <td>1300+</td>
+                                    <td>78%</td>
+                                    <td>完好</td>
+                                    <td>1020</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 兴麓小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">兴麓小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>二年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>尤老师</td>
+                                    <td>许助教</td>
+                                    <td>40</td>
+                                    <td>92%</td>
+                                    <td>1020+</td>
+                                    <td>70%</td>
+                                    <td>完好</td>
+                                    <td>820</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>许老师</td>
+                                    <td>何助教</td>
+                                    <td>38</td>
+                                    <td>90%</td>
+                                    <td>1150+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>900</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>何老师</td>
+                                    <td>郭助教</td>
+                                    <td>35</td>
+                                    <td>88%</td>
+                                    <td>1250+</td>
+                                    <td>72%</td>
+                                    <td>完好</td>
+                                    <td>950</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>机器人创新</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>郭老师</td>
+                                    <td>程助教</td>
+                                    <td>32</td>
+                                    <td>86%</td>
+                                    <td>1350+</td>
+                                    <td>80%</td>
+                                    <td>完好</td>
+                                    <td>1000</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 燕山小学 -->
+                    <div class="school-section">
+                        <h3 class="school-name">燕山小学</h3>
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>年级</th>
+                                    <th>课程类型</th>
+                                    <th>行课周期</th>
+                                    <th>讲师</th>
+                                    <th>助教</th>
+                                    <th>选课人数</th>
+                                    <th>出勤率</th>
+                                    <th>互动数据</th>
+                                    <th>课程进度</th>
+                                    <th>教具情况</th>
+                                    <th>资源访问量</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>三年级</td>
+                                    <td>机器人基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>程老师</td>
+                                    <td>傅助教</td>
+                                    <td>43</td>
+                                    <td>93%</td>
+                                    <td>1080+</td>
+                                    <td>70%</td>
+                                    <td>完好</td>
+                                    <td>880</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>四年级</td>
+                                    <td>机器人编程</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>傅老师</td>
+                                    <td>丁助教</td>
+                                    <td>41</td>
+                                    <td>91%</td>
+                                    <td>1200+</td>
+                                    <td>75%</td>
+                                    <td>完好</td>
+                                    <td>950</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>五年级</td>
+                                    <td>人工智能基础</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>丁老师</td>
+                                    <td>潘助教</td>
+                                    <td>39</td>
+                                    <td>89%</td>
+                                    <td>1300+</td>
+                                    <td>78%</td>
+                                    <td>完好</td>
+                                    <td>1020</td>
+                                    <td><span class="status-good"><i class="fas fa-check"></i> 良好</span></td>
+                                </tr>
+                                <tr>
+                                    <td>六年级</td>
+                                    <td>机器人创新</td>
+                                    <td>2025-09-01 至 2026-01-15</td>
+                                    <td>潘老师</td>
+                                    <td>袁助教</td>
+                                    <td>36</td>
+                                    <td>88%</td>
+                                    <td>1400+</td>
+                                    <td>82%</td>
+                                    <td>部分损坏</td>
+                                    <td>1080</td>
+                                    <td><span class="status-bad"><i class="fas fa-exclamation"></i> 需关注</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="middle-right">
+            <div class="module middle-right-top">
+                <div class="module-title"><i class="fas fa-bell"></i> 重要事件及AI建议</div>
+                <div class="events-container">
+                    <div class="scroll-container">
+                        <div class="event-item">
+                            <div class="event-number">1</div>
+                            <div class="event-content">【培训需求】预测学员续费高峰即将到来，代理商销售培训完成度不足，需要督促和提供帮助。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">2</div>
+                            <div class="event-content">【运营告警】服务器负载峰值24小时内多次超过75%，需要运维小组做预案。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">3</div>
+                            <div class="event-content">【市场预测】省教委审批的比赛与平台的课程高度相关，需要市场部门对接提供服务。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">4</div>
+                            <div class="event-content">【客户响应】超过10位家长希望能增加小学阶段的3D模型高级课程，需要及时跟进。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">5</div>
+                            <div class="event-content">【安全合规】监测到第三方内容API接口调用异常，过去7天错误率上升15%，存在数据获取中断风险，需技术部立即排查并准备备用方案。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">6</div>
+                            <div class="event-content">【市场响应】竞品“智慧学”本周推出AI作文批改功能，与我方规划中功能重合度达80%，需产品与市场部紧急评估发布计划与应对策略。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">7</div>
+                            <div class="event-content">【客户成功】金牌代理商“启迪教育”近30天新用户激活率下降22%，对方反馈“教师培训材料不足”，需渠道运营团队在3个工作日内介入支持。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">8</div>
+                            <div class="event-content">【技术债务】核心课程播放器的老旧视频解码库存在已知安全漏洞（CVE-2025-XXX），需在下次更新前由研发部完成升级替换，避免合规风险。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">9</div>
+                            <div class="event-content">【财务风险】检测到本季度渠道补贴款项的异常支付笔数环比增加30%，涉及三家新签约代理商，需财务与法务部联合审计，并于5个工作日内上报风险评估。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">10</div>
+                            <div class="event-content">【数据资产】核心知识图谱中“初中物理力学”章节的关联准确率降至78%（标准值>90%），已影响AI推题精准度，需算法团队在版本更新前完成优化。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">11</div>
+                            <div class="event-content">【组织效能】产研部门“课程编辑器”需求池中，P1级需求平均停留时间已达22天（目标≤14天），需技术总监协调PMO介入，重新评估资源分配。</div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-number">12</div>
+                            <div class="event-content">【生态合规】根据《生成式AI服务管理暂行办法》新规，平台“AI口语陪练”功能需在45天内完成内容安全审计备案，需合规部牵头成立专项组，协调产研同步推进。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="module middle-right-middle">
+                <div class="module-title"><i class="fas fa-video"></i> 视频巡检</div>
+                <div class="video-container">
+                    <video id="video-monitor" src="classroom1.mp4" autoplay loop muted playsinline></video>
+                    <div class="video-info">
+                        <div class="classroom-name">教室1</div>
+                        <div class="video-status status-good">正常</div>
+                    </div>
+                </div>
+            </div>
+            <div class="module middle-right-bottom">
+                <div class="module-title"><i class="fas fa-chart-bar"></i> 各省市场数据</div>
+                <div class="image-scroll-container">
+                    <div class="image-scroll-wrapper">
+                        <div class="scroll-image-item"><img src="山东省.png" alt="山东省市场数据"></div>
+                        <div class="scroll-image-item"><img src="广东省.png" alt="广东省市场数据"></div>
+                        <div class="scroll-image-item"><img src="浙江省.png" alt="浙江省市场数据"></div>
+                        <div class="scroll-image-item"><img src="湖北省.png" alt="湖北省市场数据"></div>
+                        <div class="scroll-image-item"><img src="贵州省.png" alt="贵州省市场数据"></div>
+                        <div class="scroll-image-item"><img src="辽宁省.png" alt="辽宁省市场数据"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-section">
+        <div class="module bottom-left">
+            <div class="module-title"><i class="fas fa-heartbeat"></i> 系统自身健康</div>
+            <div class="system-health-container">
+                <!-- 计算资源 -->
+                <div class="health-item">
+                    <div class="health-label">计算资源</div>
+                    <div class="health-tank">
+                        <div class="health-fill" id="cpu-fill" style="height: 65%; background-color: #4caf50; animation: fillPulse 2s ease-in-out infinite;"></div>
+                        <div class="health-value" id="cpu-value">65%</div>
+                    </div>
+                </div>
+                
+                <!-- 存储资源 -->
+                <div class="health-item">
+                    <div class="health-label">存储资源</div>
+                    <div class="health-tank">
+                        <div class="health-fill" style="height: 88%; background-color: #ff9800; animation: fillPulse 2s ease-in-out infinite 0.1s;"></div>
+                        <div class="health-value">88%</div>
+                    </div>
+                </div>
+                
+                <!-- 数据备份 -->
+                <div class="health-item">
+                    <div class="health-label">数据备份</div>
+                    <div class="health-tank">
+                        <div class="health-fill" style="height: 100%; background-color: #4caf50; animation: fillPulse 2s ease-in-out infinite 0.2s;"></div>
+                        <div class="health-value">100%</div>
+                    </div>
+                </div>
+                
+                <!-- 并发用户 -->
+                <div class="health-item">
+                    <div class="health-label">并发用户</div>
+                    <div class="health-tank">
+                        <div class="health-fill" id="users-fill" style="height: 72%; background-color: #4caf50; animation: fillPulse 2s ease-in-out infinite 0.3s;"></div>
+                        <div class="health-value" id="users-value">72%</div>
+                    </div>
+                </div>
+                
+                <!-- 强化学习资源 -->
+                <div class="health-item">
+                    <div class="health-label">强化学习</div>
+                    <div class="health-tank">
+                        <div class="health-fill" style="height: 92%; background-color: #ff5722; animation: fillPulse 2s ease-in-out infinite 0.4s;"></div>
+                        <div class="health-value">92%</div>
+                    </div>
+                </div>
+                
+                <!-- API响应 -->
+                <div class="health-item">
+                    <div class="health-label">API响应</div>
+                    <div class="health-tank">
+                        <div class="health-fill" id="api-fill" style="height: 45%; background-color: #4caf50; animation: fillPulse 2s ease-in-out infinite 0.5s;"></div>
+                        <div class="health-value" id="api-value">45%</div>
+                    </div>
+                </div>
+                
+                <!-- 网络延迟 -->
+                <div class="health-item">
+                    <div class="health-label">网络延迟</div>
+                    <div class="health-tank">
+                        <div class="health-fill" id="network-fill" style="height: 32%; background-color: #4caf50; animation: fillPulse 2s ease-in-out infinite 0.6s;"></div>
+                        <div class="health-value" id="network-value">32%</div>
+                    </div>
+                </div>
+                
+                <!-- 数据库连接 -->
+                <div class="health-item">
+                    <div class="health-label">数据库连接</div>
+                    <div class="health-tank">
+                        <div class="health-fill" id="db-fill" style="height: 58%; background-color: #4caf50; animation: fillPulse 2s ease-in-out infinite 0.7s;"></div>
+                        <div class="health-value" id="db-value">58%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="module bottom-center">
+            <div class="module-title"><i class="fas fa-headset"></i> 客服模块状态</div>
+            <div class="customer-service-container">
+                <!-- 客服值班人数 -->
+                <div class="service-item">
+                    <div class="service-label">当前值班人数</div>
+                    <div class="service-value">12人</div>
+                </div>
+                
+                <!-- 问题等级分布 -->
+                <div class="service-item">
+                    <div class="service-label">正在处理问题</div>
+                    <div class="problem-levels">
+                        <div class="level-item">
+                            <span class="level-label">紧急</span>
+                            <span class="level-value urgent">3</span>
+                        </div>
+                        <div class="level-item">
+                            <span class="level-label">重要</span>
+                            <span class="level-value important">7</span>
+                        </div>
+                        <div class="level-item">
+                            <span class="level-label">普通</span>
+                            <span class="level-value normal">15</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 超时和不满意问题 -->
+                <div class="service-item">
+                    <div class="service-label">异常问题</div>
+                    <div class="problem-issues">
+                        <div class="issue-item">
+                            <span class="issue-label">超时问题</span>
+                            <span class="issue-value timeout">8</span>
+                        </div>
+                        <div class="issue-item">
+                            <span class="issue-label">不满意问题</span>
+                            <span class="issue-value unsatisfied">5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 今日已处理问题 -->
+                <div class="service-item">
+                    <div class="service-label">今日已处理问题</div>
+                    <div class="service-value">127个</div>
+                </div>
+                
+                <!-- 报警子模块 -->
+                <div class="alarm-module">
+                    <div class="alarm-header">
+                        <div class="alarm-icon blinking-red"></div>
+                        <div class="alarm-title">紧急报警</div>
+                    </div>
+                    <div class="alarm-content">
+                        <div class="alarm-text">有1位家长需要代理商跟进服务！</div>
+                        <div class="alarm-text-detail">学生姓名：张明科，代理商：明翰教育，问题类型：调课</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="module bottom-right">10</div>
+    </div>
+    
+    <script>
+        // 更新日期时间
+        function updateDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[now.getDay()];
+            
+            const datetimeString = `${year}-${month}-${day} ${weekday} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('datetime').textContent = datetimeString;
+        }
+        
+        // 初始化并每秒更新
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // 视频巡检自动切换功能
+        const videos = [
+            { src: 'classroom1.mp4', name: '历城区实验小学', status: 'status-good', statusText: '正常' },
+            { src: 'classroom2.mp4', name: '行知小学', status: 'status-good', statusText: '正常' },
+            { src: 'classroom3.mp4', name: '安生学校初中部', status: 'status-good', statusText: '正常' }
+        ];
+        
+        let currentVideoIndex = 0;
+        const videoElement = document.getElementById('video-monitor');
+        const classroomNameElement = document.querySelector('.classroom-name');
+        const videoStatusElement = document.querySelector('.video-status');
+        
+        // 自动切换视频，每10秒切换一次
+        function switchVideo() {
+            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+            const video = videos[currentVideoIndex];
+            
+            videoElement.src = video.src;
+            videoElement.load();
+            videoElement.play();
+            
+            classroomNameElement.textContent = video.name;
+            videoStatusElement.className = `video-status ${video.status}`;
+            videoStatusElement.textContent = video.statusText;
+        }
+        
+        // 初始化第一个视频
+        videoElement.src = videos[0].src;
+        classroomNameElement.textContent = videos[0].name;
+        videoStatusElement.className = `video-status ${videos[0].status}`;
+        videoStatusElement.textContent = videos[0].statusText;
+        
+        // 设置10秒自动切换
+        setInterval(switchVideo, 10000);
+        
+        // 系统健康状态动态更新
+        // 预定义的变化模式
+        const cpuPattern = [65, 68, 72, 69, 67, 70, 66, 64, 68, 71];
+        const usersPattern = [72, 75, 78, 74, 71, 73, 76, 79, 75, 72];
+        const apiPattern = [45, 48, 52, 49, 47, 50, 53, 48, 46, 51];
+        const networkPattern = [32, 35, 38, 34, 31, 33, 36, 39, 35, 32];
+        const dbPattern = [58, 61, 64, 60, 57, 59, 62, 65, 61, 58];
+        
+        let patternIndex = 0;
+        
+        function updateHealthStatus() {
+            // 更新计算资源
+            const cpuValue = cpuPattern[patternIndex];
+            document.getElementById('cpu-value').textContent = cpuValue + '%';
+            const cpuFill = document.getElementById('cpu-fill');
+            cpuFill.style.height = cpuValue + '%';
+            // 设置颜色
+            if (cpuValue > 90) {
+                cpuFill.style.backgroundColor = '#ff5722';
+            } else if (cpuValue > 80) {
+                cpuFill.style.backgroundColor = '#ff9800';
+            } else {
+                cpuFill.style.backgroundColor = '#4caf50';
+            }
+            
+            // 更新并发用户
+            const usersValue = usersPattern[patternIndex];
+            document.getElementById('users-value').textContent = usersValue + '%';
+            const usersFill = document.getElementById('users-fill');
+            usersFill.style.height = usersValue + '%';
+            // 设置颜色
+            if (usersValue > 90) {
+                usersFill.style.backgroundColor = '#ff5722';
+            } else if (usersValue > 80) {
+                usersFill.style.backgroundColor = '#ff9800';
+            } else {
+                usersFill.style.backgroundColor = '#4caf50';
+            }
+            
+            // 更新API响应
+            const apiValue = apiPattern[patternIndex];
+            document.getElementById('api-value').textContent = apiValue + '%';
+            const apiFill = document.getElementById('api-fill');
+            apiFill.style.height = apiValue + '%';
+            // 设置颜色
+            if (apiValue > 90) {
+                apiFill.style.backgroundColor = '#ff5722';
+            } else if (apiValue > 80) {
+                apiFill.style.backgroundColor = '#ff9800';
+            } else {
+                apiFill.style.backgroundColor = '#4caf50';
+            }
+            
+            // 更新网络延迟
+            const networkValue = networkPattern[patternIndex];
+            document.getElementById('network-value').textContent = networkValue + '%';
+            const networkFill = document.getElementById('network-fill');
+            networkFill.style.height = networkValue + '%';
+            // 设置颜色
+            if (networkValue > 90) {
+                networkFill.style.backgroundColor = '#ff5722';
+            } else if (networkValue > 80) {
+                networkFill.style.backgroundColor = '#ff9800';
+            } else {
+                networkFill.style.backgroundColor = '#4caf50';
+            }
+            
+            // 更新数据库连接
+            const dbValue = dbPattern[patternIndex];
+            document.getElementById('db-value').textContent = dbValue + '%';
+            const dbFill = document.getElementById('db-fill');
+            dbFill.style.height = dbValue + '%';
+            // 设置颜色
+            if (dbValue > 90) {
+                dbFill.style.backgroundColor = '#ff5722';
+            } else if (dbValue > 80) {
+                dbFill.style.backgroundColor = '#ff9800';
+            } else {
+                dbFill.style.backgroundColor = '#4caf50';
+            }
+            
+            // 更新模式索引
+            patternIndex = (patternIndex + 1) % cpuPattern.length;
+        }
+        
+        // 每2秒更新一次健康状态
+        setInterval(updateHealthStatus, 2000);
+    </script>
+</body>
+</html>

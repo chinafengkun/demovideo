@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Xbot 演示页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .file-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .file-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .file-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .file-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .category {
+            margin: 40px 0 20px 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Xbot 演示页面</h1>
+        
+        <h2 class="category">课程总结页面</h2>
+        <div class="file-list">
+            <a href="C1v4.html" class="file-item" target="_blank">
+                <div class="file-title">C1v4.html</div>
+                <div class="file-description">课程总结页面版本4</div>
+            </a>
+            <a href="C1v5.html" class="file-item" target="_blank">
+                <div class="file-title">C1v5.html</div>
+                <div class="file-description">课程总结页面版本5</div>
+            </a>
+            <a href="C2v2.html" class="file-item" target="_blank">
+                <div class="file-title">C2v2.html</div>
+                <div class="file-description">课程总结页面版本2</div>
+            </a>
+            <a href="C2v3.html" class="file-item" target="_blank">
+                <div class="file-title">C2v3.html</div>
+                <div class="file-description">课程总结页面版本3</div>
+            </a>
+            <a href="C3v2.html" class="file-item" target="_blank">
+                <div class="file-title">C3v2.html</div>
+                <div class="file-description">课程总结页面版本2</div>
+            </a>
+            <a href="C3v3.html" class="file-item" target="_blank">
+                <div class="file-title">C3v3.html</div>
+                <div class="file-description">课程总结页面版本3</div>
+            </a>
+            <a href="C4v1.html" class="file-item" target="_blank">
+                <div class="file-title">C4v1.html</div>
+                <div class="file-description">课程总结页面版本1</div>
+            </a>
+            <a href="C4v2.html" class="file-item" target="_blank">
+                <div class="file-title">C4v2.html</div>
+                <div class="file-description">课程总结页面版本2 - 含机械臂数据和小组比较</div>
+            </a>
+        </div>
+        
+        <h2 class="category">强化学习监控页面</h2>
+        <div class="file-list">
+            <a href="RLTrainingMonitor.html" class="file-item" target="_blank">
+                <div class="file-title">RLTrainingMonitor.html</div>
+                <div class="file-description">强化学习训练监控系统 - 实时监控学生模型训练情况</div>
+            </a>
+        </div>
+        
+        <h2 class="category">大屏监控页面</h2>
+        <div class="file-list">
+            <a href="dashboardv4.1.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.1.html</div>
+                <div class="file-description">大屏监控页面版本4.1</div>
+            </a>
+            <a href="dashboardv4.2.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.2.html</div>
+                <div class="file-description">大屏监控页面版本4.2</div>
+            </a>
+            <a href="dashboardv4.3.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.3.html</div>
+                <div class="file-description">大屏监控页面版本4.3</div>
+            </a>
+            <a href="dashboardv4.4.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.4.html</div>
+                <div class="file-description">大屏监控页面版本4.4</div>
+            </a>
+            <a href="dashboardv4.5.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.5.html</div>
+                <div class="file-description">大屏监控页面版本4.5</div>
+            </a>
+            <a href="dashboardv4.6.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.6.html</div>
+                <div class="file-description">大屏监控页面版本4.6</div>
+            </a>
+            <a href="dashboardv4.7.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.7.html</div>
+                <div class="file-description">大屏监控页面版本4.7</div>
+            </a>
+            <a href="dashboardv4.8.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.8.html</div>
+                <div class="file-description">大屏监控页面版本4.8 - 图片版</div>
+            </a>
+            <a href="dashboardv4.9.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.9.html</div>
+                <div class="file-description">大屏监控页面版本4.9 - 含客服模块</div>
+            </a>
+            <a href="dashboardv4.10.html" class="file-item" target="_blank">
+                <div class="file-title">dashboardv4.10.html</div>
+                <div class="file-description">大屏监控页面版本4.10 - 最终版</div>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>AI Xbot 演示页面 © 2025</p>
+        </div>
+    </div>
+</body>
+</html>
